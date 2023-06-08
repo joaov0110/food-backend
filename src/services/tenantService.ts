@@ -6,7 +6,7 @@ import {
 import { TenantRepo } from '../repositories/tenantRepo';
 import { Service, Inject } from 'typedi';
 import { HTTP } from '../constants/http';
-import { hashPassword } from '../utils/hashPassword';
+import { PasswordHash } from '../utils/hashPassword';
 import { Api404Error } from '../utils/errors/api404Error';
 import { Api400Error } from '../utils/errors/api400Error';
 import { Api500Error } from '../utils/errors/api500Error';
@@ -51,20 +51,21 @@ export class TenantService implements ITenantService {
     this.tenantRepo = tenantRepo;
   }
 
-  getTenant = async (req: Request, res: Response, next: NextFunction) => {
+  public getTenant = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
     try {
-      const data = await this.tenantRepo.getTenantById(1);
-      if (!data) {
-        throw new Api404Error('Tenant not found');
-      }
+      const tenant = await this.tenantRepo.getTenantById(1);
 
-      return res.status(HTTP.OK).send(data);
+      return res.status(HTTP.OK).send(tenant);
     } catch (err) {
       return next(err);
     }
   };
 
-  createTenant = async (
+  public createTenant = async (
     req: createTenantReq,
     res: Response,
     next: NextFunction,
@@ -79,8 +80,10 @@ export class TenantService implements ITenantService {
       accountant_email,
     } = req.body;
 
+    let passwordHash: string;
+
     try {
-      const tenantExists = await this.tenantRepo.filterTenant({
+      const tenantWithSameInfoExists = await this.tenantRepo.filterTenant({
         OR: [
           {
             name: {
@@ -99,44 +102,41 @@ export class TenantService implements ITenantService {
           },
         ],
       });
-      if (tenantExists) {
+
+      if (tenantWithSameInfoExists) {
         throw new Api400Error('Tenant already exists');
       }
     } catch (err) {
       return next(err);
     }
 
-    let hash;
     try {
-      hash = hashPassword(password);
-      if (!hash) {
-        throw new Api500Error('An error has ocurred. Please try again later');
-      }
+      passwordHash = PasswordHash.hashPassword(password);
     } catch (err) {
       return next(err);
     }
 
     try {
-      const createTenant = await this.tenantRepo.createTenant({
+      const tenantCreated = await this.tenantRepo.createTenant({
         name,
         document,
         email,
-        password: hash as string,
+        password: passwordHash,
         accountant_email,
         accountant_name,
         accountant_phone,
       });
 
-      if (!createTenant) {
+      if (!tenantCreated) {
         throw new Api500Error('An error has ocurred. Please try again later');
       }
-      return res.status(HTTP.CREATED).json(createTenant);
+      return res.status(HTTP.CREATED).json(tenantCreated);
     } catch (err) {
       return next(err);
     }
   };
 
-  updateTenant = async (
+  public updateTenant = async (
     req: updateTenantReq,
     res: Response,
     next: NextFunction,
@@ -151,28 +151,33 @@ export class TenantService implements ITenantService {
       accountant_phone,
     } = req.body;
 
-    let tenant;
+    let currentTenant;
+
+    const differentTenantFilter = {
+      NOT: {
+        id: {
+          equals: tenant_id,
+        },
+      },
+    };
 
     try {
-      tenant = await this.tenantRepo.getTenantById(tenant_id);
-      if (!tenant) {
+      currentTenant = await this.tenantRepo.getTenantById(tenant_id);
+      if (!currentTenant) {
         throw new Api404Error('Tenant not found');
       }
     } catch (err) {
       return next(err);
     }
 
-    if (name !== tenant.name) {
+    if (name !== currentTenant.name) {
       try {
-        const nameExists = await this.tenantRepo.getTenantByName(name, {
-          NOT: {
-            id: {
-              equals: tenant_id,
-            },
-          },
-        });
+        const tenantWithSameNameExists = await this.tenantRepo.getTenantByName(
+          name,
+          differentTenantFilter,
+        );
 
-        if (nameExists) {
+        if (tenantWithSameNameExists) {
           throw new Api406Error('Name already in use');
         }
       } catch (err) {
@@ -180,17 +185,12 @@ export class TenantService implements ITenantService {
       }
     }
 
-    if (email !== tenant.email) {
+    if (email !== currentTenant.email) {
       try {
-        const emailExists = await this.tenantRepo.getTenantByEmail(email, {
-          NOT: {
-            id: {
-              equals: tenant_id,
-            },
-          },
-        });
+        const tenantWithSameEmailExists =
+          await this.tenantRepo.getTenantByEmail(email, differentTenantFilter);
 
-        if (emailExists) {
+        if (tenantWithSameEmailExists) {
           throw new Api406Error('Email already in use');
         }
       } catch (err) {
@@ -198,20 +198,15 @@ export class TenantService implements ITenantService {
       }
     }
 
-    if (document !== tenant.document) {
+    if (document !== currentTenant.document) {
       try {
-        const documentExists = await this.tenantRepo.getTenantByDocument(
-          document,
-          {
-            NOT: {
-              id: {
-                equals: tenant_id,
-              },
-            },
-          },
-        );
+        const tenantWithSameDocumentExists =
+          await this.tenantRepo.getTenantByDocument(
+            document,
+            differentTenantFilter,
+          );
 
-        if (documentExists) {
+        if (tenantWithSameDocumentExists) {
           throw new Api406Error('document already in use');
         }
       } catch (err) {
@@ -220,7 +215,7 @@ export class TenantService implements ITenantService {
     }
 
     try {
-      const updateTenant = await this.tenantRepo.updateTenant(tenant_id, {
+      const tenantUpdated = await this.tenantRepo.updateTenant(tenant_id, {
         name,
         email,
         document,
@@ -230,7 +225,7 @@ export class TenantService implements ITenantService {
         updated_at: dayjs().toDate(),
       });
 
-      if (!updateTenant) {
+      if (!tenantUpdated) {
         throw new Api500Error('Error updating tenant. Try again later');
       }
 
@@ -240,7 +235,7 @@ export class TenantService implements ITenantService {
     }
   };
 
-  removeTenant = async (
+  public removeTenant = async (
     req: removeTenantReq,
     res: Response,
     next: NextFunction,
@@ -257,8 +252,8 @@ export class TenantService implements ITenantService {
     }
 
     try {
-      const tenantRemove = await this.tenantRepo.deleteTenant(tenant_id);
-      if (!tenantRemove) {
+      const removeTenant = await this.tenantRepo.deleteTenant(tenant_id);
+      if (!removeTenant) {
         throw new Api500Error('Error deleting tenant. Try again later');
       }
 
