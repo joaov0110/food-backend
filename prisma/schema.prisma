@@ -25,7 +25,8 @@ model Tenant {
   created_at       DateTime  @default(now())
   updated_at       DateTime?
 
-  points           Point[] 
+  points           Point[]
+  address          Address?
 }
 
 model Point {
@@ -37,6 +38,7 @@ model Point {
 
   tenant     Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   catalogs   CatalogOnPoint[]
+  address    Address?
 }
 
 model Catalog {
@@ -84,4 +86,22 @@ model Product {
   productGroup_id   Int
 
   productGroup   ProductGroups  @relation(fields: [productGroup_id], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id            Int      @id @default(autoincrement()) @unique
+  postalCode    String   @db.VarChar(9)
+  street        String   @db.VarChar(25)
+  street_number String   @db.VarChar(5)
+  district      String   @db.VarChar(20)
+  city          String   @db.VarChar(10)
+  UF            String   @db.VarChar(2)
+  tenant_id     Int?      @unique
+  point_id      Int?      @unique
+
+  tenant        Tenant?   @relation(fields: [tenant_id], references: [id])
+  point         Point?    @relation(fields: [point_id], references: [id])
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
 }
