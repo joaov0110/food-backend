@@ -1,12 +1,13 @@
 import { prisma } from '../config/prismaClient';
+import { Service } from 'typedi';
+import { PrismaClient } from '@prisma/client';
+
 import {
   Ifilter,
   ItenantData,
   IcreateTenantRequest,
   IupdateTenant,
 } from '../interfaces/tenant';
-import { Service } from 'typedi';
-import { PrismaClient } from '@prisma/client';
 
 const dataToSelect = {
   id: true,
@@ -61,7 +62,7 @@ export class TenantRepo implements ITenantRepo {
     this.orm = prisma;
   }
 
-  getTenantById = async (id: number) =>
+  public getTenantById = async (id: number) =>
     await this.orm.tenant.findUnique({
       where: {
         id,
@@ -69,7 +70,10 @@ export class TenantRepo implements ITenantRepo {
       select: dataToSelect,
     });
 
-  getTenantByName = async (name: string, filter: Ifilter = [] as Ifilter) =>
+  public getTenantByName = async (
+    name: string,
+    filter: Ifilter = [] as Ifilter,
+  ) =>
     await this.orm.tenant.findFirst({
       where: {
         name,
@@ -78,7 +82,10 @@ export class TenantRepo implements ITenantRepo {
       select: dataToSelect,
     });
 
-  getTenantByEmail = async (email: string, filter: Ifilter = [] as Ifilter) =>
+  public getTenantByEmail = async (
+    email: string,
+    filter: Ifilter = [] as Ifilter,
+  ) =>
     await this.orm.tenant.findUnique({
       where: {
         email,
@@ -87,7 +94,7 @@ export class TenantRepo implements ITenantRepo {
       select: dataToSelect,
     });
 
-  getTenantByDocument = async (
+  public getTenantByDocument = async (
     document: string,
     filter: Ifilter = [] as Ifilter,
   ) =>
@@ -99,14 +106,14 @@ export class TenantRepo implements ITenantRepo {
       select: dataToSelect,
     });
 
-  filterTenant = async (filter: Ifilter) =>
+  public filterTenant = async (filter: Ifilter) =>
     await this.orm.tenant.findFirst({
       where: {
         ...filter,
       },
     });
 
-  createTenant = async (data: IcreateTenantRequest) =>
+  public createTenant = async (data: IcreateTenantRequest) =>
     await this.orm.tenant.create({
       data: {
         ...data,
@@ -114,7 +121,7 @@ export class TenantRepo implements ITenantRepo {
       select: dataToSelect,
     });
 
-  updateTenant = async (id: number, data: IupdateTenant) =>
+  public updateTenant = async (id: number, data: IupdateTenant) =>
     await this.orm.tenant.update({
       where: {
         id,
@@ -125,7 +132,7 @@ export class TenantRepo implements ITenantRepo {
       select: dataToSelect,
     });
 
-  deleteTenant = async (id: number) =>
+  public deleteTenant = async (id: number) =>
     await this.orm.tenant.delete({
       where: {
         id,
