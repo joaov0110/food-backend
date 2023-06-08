@@ -9,13 +9,21 @@ import { TenantController } from './controllers/tenantController';
 import errorHandler from './utils/errors/errorHandler';
 
 class Main {
-  app;
-  tenantController: TenantController;
+  public app;
+  private tenantController: TenantController;
 
   constructor() {
     env.config();
-
     this.app = express();
+
+    this.configApp();
+
+    this.setupControllers();
+
+    this.useErrorHandlers();
+  }
+
+  private configApp() {
     this.app.use(
       cors({
         origin: 'http://localhost:4005',
@@ -25,24 +33,25 @@ class Main {
     this.app.use(morgan('dev'));
     this.app.use(urlencoded({ extended: true }));
     this.app.use(json());
-
-    this.handleControllers();
-    this.handleError();
-    this.handleProgrammerErrors();
   }
 
-  handleControllers() {
+  private setupControllers() {
     this.tenantController = Container.get(TenantController);
+    this.useControllers();
+  }
 
+  private useControllers() {
     this.app.use('/api/tenants', this.tenantController.router);
   }
 
-  handleError() {
+  private useErrorHandlers() {
     this.app.use(errorHandler.logErrorMiddleware);
     this.app.use(errorHandler.returnError);
+
+    this.catchProgrammerErrors();
   }
 
-  handleProgrammerErrors() {
+  private catchProgrammerErrors() {
     process.on('unhandledRejection', (error) => {
       throw error;
     });

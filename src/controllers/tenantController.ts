@@ -7,8 +7,8 @@ import { validatorsReturnal } from '../utils/validators/validatorsReturnal';
 
 @Service()
 export class TenantController {
-  router: Router;
-  tenantService: TenantService;
+  public router: Router;
+  private tenantService: TenantService;
 
   constructor(@Inject() tenantService: TenantService) {
     this.router = Router();
@@ -17,7 +17,7 @@ export class TenantController {
     this.routes();
   }
 
-  routes() {
+  private routes() {
     this.router.get('/tenant', this.tenantService.getTenant);
 
     this.router.post(
