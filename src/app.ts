@@ -2,15 +2,14 @@ import 'reflect-metadata';
 import env from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
-import express, { urlencoded, json } from 'express';
-import { Container } from 'typedi';
+import express, { urlencoded, json, Router } from 'express';
 
-import { TenantController } from './controllers/tenantController';
+import tenantInjector from './interfaces/injectors/tenantInjector';
 import errorHandler from './utils/errors/errorHandler';
 
 class Main {
   public app;
-  private tenantController: TenantController;
+  private tenantController: Router;
 
   constructor() {
     env.config();
@@ -36,12 +35,13 @@ class Main {
   }
 
   private setupControllers() {
-    this.tenantController = Container.get(TenantController);
+    this.tenantController = tenantInjector;
+
     this.useControllers();
   }
 
   private useControllers() {
-    this.app.use('/api/tenants', this.tenantController.router);
+    this.app.use('/api/tenants', this.tenantController);
   }
 
   private useErrorHandlers() {
