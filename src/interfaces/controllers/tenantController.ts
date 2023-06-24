@@ -94,11 +94,7 @@ export class TenantController implements ITenantController {
 
     try {
       passwordHash = PasswordHash.hashPassword(password);
-    } catch (err) {
-      return next(err);
-    }
 
-    try {
       const tenantCreated = this.tenantService.createTenant(
         {
           name,
