@@ -3,7 +3,7 @@ import { BaseError } from './baseError';
 
 class ErrorHandler {
   public logError = (err: Error) => {
-    console.error('############', err);
+    console.error('\n############', err);
   };
 
   public logErrorMiddleware = (
