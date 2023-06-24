@@ -83,11 +83,11 @@ export class TenantController implements ITenantController {
     let passwordHash: string;
 
     try {
-      await this.tenantService.getTenantByName(name);
-
-      await this.tenantService.getTenantByEmail(email);
-
-      await this.tenantService.getTenantByDocument(document);
+      await Promise.all([
+        this.tenantService.getTenantByName(name),
+        this.tenantService.getTenantByEmail(email),
+        this.tenantService.getTenantByDocument(document),
+      ]);
     } catch (err) {
       return next(err);
     }
