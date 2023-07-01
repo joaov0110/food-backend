@@ -56,7 +56,7 @@ export class TenantController implements ITenantController {
     next: NextFunction,
   ) => {
     try {
-      const tenant = await this.tenantService.getTenantById(1);
+      const tenant = await this.tenantService.tenantByIdShouldExist(6);
 
       return res.status(HTTP.OK).send(tenant);
     } catch (err) {
@@ -84,23 +84,21 @@ export class TenantController implements ITenantController {
 
     try {
       await Promise.all([
-        this.tenantService.getTenantByName(name),
-        this.tenantService.getTenantByEmail(email),
-        this.tenantService.getTenantByDocument(document),
+        this.tenantService.tenantByNameShouldNotExist(name),
+        this.tenantService.tenantByEmailShouldNotExist(email),
+        this.tenantService.tenantByDocumentShouldNotExist(document),
       ]);
     } catch (err) {
       return next(err);
     }
 
     try {
-      passwordHash = PasswordHash.hashPassword(password);
-
-      const tenantCreated = this.tenantService.createTenant(
+      const tenantCreated = await this.tenantService.createTenant(
         {
           name,
           document,
           email,
-          password: passwordHash,
+          password: PasswordHash.hashPassword(password),
           accountant_email,
           accountant_name,
           accountant_phone,
@@ -132,34 +130,31 @@ export class TenantController implements ITenantController {
 
     let currentTenant;
     try {
-      currentTenant = await this.tenantService.getTenantById(tenant_id);
+      currentTenant = await this.tenantService.tenantByIdShouldExist(tenant_id);
     } catch (err) {
       return next(err);
     }
 
     try {
       if (name !== currentTenant!.name) {
-        await this.tenantService.tenantWithSameNameAlreadyExists(
-          tenant_id,
-          name,
-        );
+        await this.tenantService.checkIfNewTenantNameIsAllowed(tenant_id, name);
       }
 
       if (email !== currentTenant!.email) {
-        await this.tenantService.tenantWithSameEmailAlreadyExists(
+        await this.tenantService.checkIfNewTenantEmailIsAllowed(
           tenant_id,
           email,
         );
       }
 
       if (document !== currentTenant!.document) {
-        await this.tenantService.tenantWithSameDocumentAlreadyExists(
+        await this.tenantService.checkIfNewTenantDocumentIsAllowed(
           tenant_id,
           document,
         );
       }
     } catch (err) {
-      next(err);
+      return next(err);
     }
 
     try {
@@ -191,7 +186,7 @@ export class TenantController implements ITenantController {
     const { tenant_id } = req.body;
 
     try {
-      await this.tenantService.getTenantById(tenant_id);
+      await this.tenantService.tenantByIdShouldExist(tenant_id);
 
       await this.tenantService.deleteTenant(tenant_id);
 

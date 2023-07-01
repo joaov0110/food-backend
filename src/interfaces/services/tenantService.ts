@@ -9,27 +9,36 @@ import {
   IupdateTenantRepo,
 } from '../../schemas/tenant';
 import { Iaddress } from '../../schemas/address';
+import { filterTenatWithDiferentId } from '../../utils/diffTenantFilter';
 
 export interface ITenantService {
-  getTenantById: (id: number) => Promise<ItenantReturnal | void>;
+  tenantByIdShouldExist: (id: number) => Promise<ItenantReturnal | void>;
 
-  getTenantByEmail: (email: string) => Promise<ItenantReturnal | void>;
+  tenantByNameShouldExist: (email: string) => Promise<ItenantReturnal | null>;
 
-  getTenantByName: (name: string) => Promise<ItenantReturnal | void>;
+  tenantByEmailShouldExist: (name: string) => Promise<ItenantReturnal | null>;
 
-  getTenantByDocument: (document: string) => Promise<ItenantReturnal | void>;
+  tenantByDocumentShouldExist: (
+    document: string,
+  ) => Promise<ItenantReturnal | null>;
 
-  tenantWithSameEmailAlreadyExists: (
+  tenantByNameShouldNotExist: (name: string) => Promise<void>;
+
+  tenantByEmailShouldNotExist: (email: string) => Promise<void>;
+
+  tenantByDocumentShouldNotExist: (document: string) => Promise<void>;
+
+  checkIfNewTenantEmailIsAllowed: (
     tenant_id: number,
     email: string,
   ) => Promise<ItenantReturnal | void>;
 
-  tenantWithSameNameAlreadyExists: (
+  checkIfNewTenantNameIsAllowed: (
     tenant_id: number,
     name: string,
   ) => Promise<ItenantReturnal | void>;
 
-  tenantWithSameDocumentAlreadyExists: (
+  checkIfNewTenantDocumentIsAllowed: (
     tenant_id: number,
     document: string,
   ) => Promise<ItenantReturnal | void>;
@@ -51,18 +60,30 @@ export class TenantService implements ITenantService {
     this.tenantRepo = tenantRepo;
   }
 
-  private filterTenatWhereDiferentId = (tenant_id: number) => {
-    return {
-      NOT: {
-        id: {
-          equals: tenant_id,
-        },
-      },
-    };
+  tenantByNameShouldNotExist = async (name: string) => {
+    const tenant = await this.tenantRepo.getTenantByName(name);
+
+    if (tenant) {
+      throw new Api400Error('A tenant with this name already exists');
+    }
   };
 
-  getTenantById = async (id: number) => {
-    const tenant = await this.tenantRepo.getTenantById(1);
+  tenantByEmailShouldNotExist = async (email: string) => {
+    const tenant = await this.tenantRepo.getTenantByEmail(email);
+    if (tenant) {
+      throw new Api400Error('A tenant with this email already exists');
+    }
+  };
+
+  tenantByDocumentShouldNotExist = async (document: string) => {
+    const tenant = await this.tenantRepo.getTenantByDocument(document);
+    if (tenant) {
+      throw new Api400Error('A tenant with this document already exists');
+    }
+  };
+
+  tenantByIdShouldExist = async (id: number) => {
+    const tenant = await this.tenantRepo.getTenantById(id);
 
     if (!tenant) {
       throw new Api404Error('Tenant not found');
@@ -71,43 +92,39 @@ export class TenantService implements ITenantService {
     return tenant;
   };
 
-  getTenantByEmail = async (email: string) => {
-    const tenant = await this.tenantRepo.getTenantByEmail(email);
-
-    if (!tenant) {
-      throw new Api400Error('Tenant not found');
-    }
-
-    return tenant;
-  };
-
-  getTenantByName = async (name: string) => {
+  tenantByNameShouldExist = async (name: string) => {
     const tenant = await this.tenantRepo.getTenantByName(name);
 
     if (!tenant) {
-      throw new Api400Error('Tenant not found');
+      throw new Api404Error('Tenant not found');
     }
 
     return tenant;
   };
 
-  getTenantByDocument = async (document: string) => {
+  tenantByEmailShouldExist = async (email: string) => {
+    const tenant = await this.tenantRepo.getTenantByEmail(email);
+    if (!tenant) {
+      throw new Api404Error('Tenant not found');
+    }
+
+    return tenant;
+  };
+
+  tenantByDocumentShouldExist = async (document: string) => {
     const tenant = await this.tenantRepo.getTenantByDocument(document);
 
     if (!tenant) {
-      throw new Api400Error('Tenant not found');
+      throw new Api404Error('Tenant not found');
     }
 
     return tenant;
   };
 
-  tenantWithSameEmailAlreadyExists = async (
-    tenant_id: number,
-    email: string,
-  ) => {
+  checkIfNewTenantEmailIsAllowed = async (tenant_id: number, email: string) => {
     const tenant = await this.tenantRepo.getTenantByEmail(
       email,
-      this.filterTenatWhereDiferentId(tenant_id),
+      filterTenatWithDiferentId(tenant_id),
     );
 
     if (tenant) {
@@ -115,10 +132,10 @@ export class TenantService implements ITenantService {
     }
   };
 
-  tenantWithSameNameAlreadyExists = async (tenant_id: number, name: string) => {
+  checkIfNewTenantNameIsAllowed = async (tenant_id: number, name: string) => {
     const tenant = await this.tenantRepo.getTenantByName(
       name,
-      this.filterTenatWhereDiferentId(tenant_id),
+      filterTenatWithDiferentId(tenant_id),
     );
 
     if (tenant) {
@@ -126,13 +143,13 @@ export class TenantService implements ITenantService {
     }
   };
 
-  tenantWithSameDocumentAlreadyExists = async (
+  checkIfNewTenantDocumentIsAllowed = async (
     tenant_id: number,
     document: string,
   ) => {
     const tenant = await this.tenantRepo.getTenantByDocument(
       document,
-      this.filterTenatWhereDiferentId(tenant_id),
+      filterTenatWithDiferentId(tenant_id),
     );
 
     if (tenant) {
