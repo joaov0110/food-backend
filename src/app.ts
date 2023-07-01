@@ -4,7 +4,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import express, { urlencoded, json, Router } from 'express';
 
-import tenantInjector from './interfaces/injectors/tenantInjector';
+import tenantFactory from './interfaces/factories/tenantFactory';
 import errorHandler from './utils/errors/errorHandler';
 
 class Main {
@@ -35,7 +35,7 @@ class Main {
   }
 
   private setupControllers() {
-    this.tenantController = tenantInjector;
+    this.tenantController = tenantFactory;
 
     this.useControllers();
   }
@@ -56,7 +56,7 @@ class Main {
       throw error;
     });
 
-    process.on('uncaughtException', (error: Error) => {
+    process.on('uncaughtException', (error) => {
       errorHandler.logError(error);
 
       if (!errorHandler.isOperationalError(error)) {
