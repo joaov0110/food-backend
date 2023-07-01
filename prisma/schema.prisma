@@ -96,8 +96,8 @@ model Address {
   district      String   @db.VarChar(20)
   city          String   @db.VarChar(10)
   UF            String   @db.VarChar(2)
-  tenant_id     Int      @unique
-  point_id      Int      @unique
+  tenant_id     Int?      @unique
+  point_id      Int?      @unique
 
   tenant        Tenant?   @relation(fields: [tenant_id], references: [id])
   point         Point?    @relation(fields: [point_id], references: [id])
