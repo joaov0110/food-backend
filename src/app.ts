@@ -25,7 +25,7 @@ class Main {
   private configApp() {
     this.app.use(
       cors({
-        origin: 'http://localhost:4005',
+        origin: 'http://localhost:5173',
         credentials: true,
       }),
     );
