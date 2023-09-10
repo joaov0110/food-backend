@@ -1,0 +1,8 @@
+{
+  "verbose": true,
+  "ignore": [],
+  "watch": ["./src"],
+  "ext": ".ts,.js",
+  "exec": "ts-node ./src/index.ts -e",
+  "delay": 1200
+}

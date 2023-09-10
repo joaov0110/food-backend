@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id               Int      @id @default(autoincrement())  @unique
+  name             String   @db.VarChar(25)
+  document         String   @db.VarChar(16) @unique
+  email            String   @db.VarChar(50) @unique
+  password         String   @db.VarChar(255)
+  accountant_name  String   @db.VarChar(20)
+  accountant_email String   @db.VarChar(50)
+  accountant_phone String   @db.VarChar(20) @unique
+  is_new_tenant    Boolean  @db.Bit(1) @default(true)
+  image_url        String?   @db.VarChar(200)
+  bgImage_url      String?   @db.VarChar(200)
+  created_at       DateTime  @default(now())
+  updated_at       DateTime?
+
+  points           Point[]
+  address          Address?
+}
+
+model Point {
+  id          Int       @id @default(autoincrement()) @unique
+  name        String    @db.VarChar(25)
+  email       String    @db.VarChar(50) @unique()
+  phone       String    @db.VarChar(20) @unique()
+  tenant_id   Int
+
+  tenant     Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  catalogs   CatalogOnPoint[]
+  address    Address?
+}
+
+model Catalog {
+  id          Int       @id @default(autoincrement()) @unique
+  name        String    @db.VarChar(25)
+  points      CatalogOnPoint[]
+  productGroups  CatalogOnProductGroups[]
+}
+
+model CatalogOnPoint {
+  point      Point      @relation(fields: [point_id], references: [id])
+  catalog    Catalog    @relation(fields: [catalog_id], references: [id])
+  point_id   Int
+  catalog_id Int
+  created_at DateTime   @default(now())
+
+  @@id([catalog_id, point_id])
+}
+
+
+model ProductGroups {
+  id             Int      @id @default(autoincrement()) @unique
+  name           String   @db.VarChar(25)
+
+  product        Product[]
+  catalogs       CatalogOnProductGroups[]
+}
+
+model CatalogOnProductGroups {
+  productGroups   ProductGroups    @relation(fields: [productGroup_id], references: [id])
+  catalogs        Catalog          @relation(fields: [catalog_id], references: [id])
+  productGroup_id Int
+  catalog_id      Int
+  created_at      DateTime         @default(now())
+
+  @@id([productGroup_id, catalog_id])
+}
+
+model Product {
+  id            Int      @id @default(autoincrement()) @unique
+  name          String   @db.VarChar(25)
+  image_url     String   @db.VarChar(200)
+  qnt_available Int      @db.Int
+  availabe_for_sale  Boolean  @default(true)
+  productGroup_id   Int
+
+  productGroup   ProductGroups  @relation(fields: [productGroup_id], references: [id], onDelete: Cascade)
+}
+
+model Address {
+  id            Int      @id @default(autoincrement()) @unique
+  postalCode    String   @db.VarChar(9)
+  street        String   @db.VarChar(25)
+  street_number String   @db.VarChar(5)
+  district      String   @db.VarChar(20)
+  city          String   @db.VarChar(10)
+  UF            String   @db.VarChar(2)
+  tenant_id     Int?      @unique
+  point_id      Int?      @unique
+
+  tenant        Tenant?   @relation(fields: [tenant_id], references: [id])
+  point         Point?    @relation(fields: [point_id], references: [id])
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
+}
