@@ -80,8 +80,6 @@ export class TenantController implements ITenantController {
       address,
     } = req.body;
 
-    let passwordHash: string;
-
     try {
       await Promise.all([
         this.tenantService.tenantByNameShouldNotExist(name),
