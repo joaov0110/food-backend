@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { ITenantController } from '../controllers/tenantController';
 
 import createTenant from '../../utils/validations/createTenantValidator';
+import updateTenant from '../../utils/validations/updateTenantValidator';
 
 export class TenantRoutes {
   public router: Router;
@@ -24,7 +25,11 @@ export class TenantRoutes {
       this.tenantController.createTenant,
     );
 
-    this.router.put('/tenant', this.tenantController.updateTenant);
+    this.router.put(
+      '/tenant',
+      updateTenant,
+      this.tenantController.updateTenant,
+    );
 
     this.router.delete('/tenant', this.tenantController.removeTenant);
   }
