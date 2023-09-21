@@ -5,11 +5,13 @@ import morgan from 'morgan';
 import express, { urlencoded, json, Router } from 'express';
 
 import tenantFactory from './interfaces/factories/tenantFactory';
+import pointFactory from './interfaces/factories/pointFactory';
 import errorHandler from './utils/errors/errorHandler';
 
 class Main {
   public app;
   private tenantController: Router;
+  private pointRouter: Router;
 
   constructor() {
     env.config();
@@ -36,12 +38,14 @@ class Main {
 
   private setupControllers() {
     this.tenantController = tenantFactory;
+    this.pointRouter = pointFactory;
 
     this.useControllers();
   }
 
   private useControllers() {
     this.app.use('/api/tenants', this.tenantController);
+    this.app.use('/api/points', this.pointRouter);
   }
 
   private useErrorHandlers() {
