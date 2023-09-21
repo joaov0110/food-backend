@@ -34,11 +34,16 @@ model Point {
   name        String    @db.VarChar(25)
   email       String    @db.VarChar(50) @unique()
   phone       String    @db.VarChar(20) @unique()
+  image_url   String?    @db.VarChar(200) @unique()
+  bgImage_url String?    @db.VarChar(200)  @unique()
+  created_at  DateTime   @default(now())
+  updated_at  DateTime?
+
   tenant_id   Int
 
   tenant     Tenant   @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   catalogs   CatalogOnPoint[]
-  address    Address?
+  address    PointAddress?
 }
 
 model Catalog {
@@ -96,11 +101,25 @@ model Address {
   district      String   @db.VarChar(20)
   city          String   @db.VarChar(10)
   UF            String   @db.VarChar(2)
-  tenant_id     Int?      @unique
-  point_id      Int?      @unique
+  tenant_id     Int      @unique
 
-  tenant        Tenant?   @relation(fields: [tenant_id], references: [id])
-  point         Point?    @relation(fields: [point_id], references: [id])
+  tenant        Tenant   @relation(fields: [tenant_id], references: [id])
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime?
+}
+
+model PointAddress {
+  id            Int      @id @default(autoincrement()) @unique
+  postalCode    String   @db.VarChar(9)
+  street        String   @db.VarChar(25)
+  street_number String   @db.VarChar(5)
+  district      String   @db.VarChar(20)
+  city          String   @db.VarChar(10)
+  UF            String   @db.VarChar(2)
+  point_id     Int      @unique
+
+  point        Point   @relation(fields: [point_id], references: [id])
 
   created_at    DateTime  @default(now())
   updated_at    DateTime?
