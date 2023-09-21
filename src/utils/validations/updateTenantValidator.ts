@@ -5,6 +5,7 @@ import DocumentValidator from './documentValidator';
 
 const updateTenant = (req: Request, res: Response, next: NextFunction) => {
   const schema = Joi.object({
+    tenant_id: Joi.number().required(),
     name: Joi.string().min(5).max(25),
     document: Joi.string()
       .min(14)
