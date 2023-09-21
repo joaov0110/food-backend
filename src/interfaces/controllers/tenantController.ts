@@ -167,7 +167,10 @@ export class TenantController implements ITenantController {
           accountant_phone,
           updated_at: dayjs().toDate(),
         },
-        address,
+        address: {
+          ...address,
+          updated_at: dayjs().toDate(),
+        },
       });
 
       return res.status(HTTP.OK).send('Tenant updated');
