@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import config from 'config';
 import env from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -27,7 +28,7 @@ class Main {
   private configApp() {
     this.app.use(
       cors({
-        origin: 'http://localhost:5173',
+        origin: config.get<string>('url'),
         credentials: true,
       }),
     );
