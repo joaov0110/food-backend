@@ -5,7 +5,7 @@ import { ITenantController } from '../controllers/tenantController';
 import createTenant from '../../utils/validations/createTenantValidator';
 import updateTenant from '../../utils/validations/updateTenantValidator';
 
-import { uploader } from '../../config/multer';
+import { uploader } from '../../services/multer';
 
 export class TenantRoutes {
   public router: Router;

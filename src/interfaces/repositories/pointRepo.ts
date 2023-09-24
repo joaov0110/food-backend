@@ -1,4 +1,4 @@
-import { prisma } from '../../config/prismaClient';
+import { prisma } from '../../services/prismaClient';
 import { PrismaClient } from '@prisma/client';
 import {
   IcreatePoint,
