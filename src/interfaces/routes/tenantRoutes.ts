@@ -5,6 +5,8 @@ import { ITenantController } from '../controllers/tenantController';
 import createTenant from '../../utils/validations/createTenantValidator';
 import updateTenant from '../../utils/validations/updateTenantValidator';
 
+import { uploader } from '../../config/multer';
+
 export class TenantRoutes {
   public router: Router;
   private tenantController: ITenantController;
@@ -29,6 +31,12 @@ export class TenantRoutes {
       '/tenant',
       updateTenant,
       this.tenantController.updateTenant,
+    );
+
+    this.router.put(
+      '/tenant/profilePicture',
+      uploader.single('profilePicture'),
+      this.tenantController.updateTenantProfilePicture,
     );
 
     this.router.delete('/tenant', this.tenantController.removeTenant);

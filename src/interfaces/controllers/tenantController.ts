@@ -36,6 +36,12 @@ export interface ITenantController {
     next: NextFunction,
   ) => Promise<Response | void>;
 
+  updateTenantProfilePicture: (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => Promise<Response | void>;
+
   removeTenant: (
     req: removeTenantReq,
     res: Response,
@@ -177,6 +183,16 @@ export class TenantController implements ITenantController {
     } catch (err) {
       return next(err);
     }
+  };
+
+  public updateTenantProfilePicture = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const file = req.file;
+
+    console.log('sdfsdfsfsfsf', file);
   };
 
   public removeTenant = async (
