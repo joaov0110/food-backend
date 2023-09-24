@@ -81,6 +81,7 @@ class PointController implements IPointController {
       Promise.all([
         await this.tenantService.tenantByIdShouldExist(tenant_id),
         await this.pointService.pointByNameShouldNotExist(name),
+        await this.pointService.pointByPhoneShouldNotExist(phone),
       ]);
     } catch (err) {
       return next(err);

@@ -11,6 +11,8 @@ export interface IPointService {
 
   pointByNameShouldNotExist: (point_name: string) => Promise<any>;
 
+  pointByPhoneShouldNotExist: (point_phone: string) => Promise<any>;
+
   createPoint: (
     pointData: IcreatePoint,
     tenant_id: number,
@@ -52,14 +54,23 @@ class PointService implements IPointService {
     }
   };
 
-  public createPoint = async (data: IcreatePoint, tenant_id: number) => {
-    const createPoint = await this.pointRepo.createPoint(data, tenant_id);
+  pointByPhoneShouldNotExist = async (phone: string) => {
+    const point = await this.pointRepo.getPointByPhone(phone);
 
-    if (!createPoint) {
+    if (point) {
+      throw new Api400Error('Point with this phone already exists');
+    }
+  };
+
+  public createPoint = async (data: IcreatePoint, tenant_id: number) => {
+    try {
+      const createPoint = await this.pointRepo.createPoint(data, tenant_id);
+
+      return createPoint;
+    } catch (err) {
+      console.error(err);
       throw new Api500Error('Error creating point. Try again later');
     }
-
-    return createPoint;
   };
 }
 
