@@ -1,5 +1,7 @@
+import config from 'config';
+
 import main from './app';
 
-main.listen(process.env.API_PORT, () => {
-  console.log(`Server running on port ${process.env.API_PORT}`);
+main.listen(config.get<number>('port'), () => {
+  console.log(`Server running on port ${config.get<number>('port')}`);
 });
