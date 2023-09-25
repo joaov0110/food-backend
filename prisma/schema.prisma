@@ -20,6 +20,7 @@ model Tenant {
   accountant_email String   @db.VarChar(50)
   accountant_phone String   @db.VarChar(20) @unique
   is_new_tenant    Boolean  @db.Bit(1) @default(true)
+  image_name       String?  @db.VarChar(150)
   image_url        String?   @db.VarChar(200)
   bgImage_url      String?   @db.VarChar(200)
   created_at       DateTime  @default(now())
