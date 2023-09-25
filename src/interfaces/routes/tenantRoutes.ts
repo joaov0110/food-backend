@@ -39,6 +39,12 @@ export class TenantRoutes {
       this.tenantController.updateTenantProfilePicture,
     );
 
+    this.router.put(
+      '/tenant/coverPicture',
+      uploader.single('image'),
+      this.tenantController.updateTenantCoverPicture,
+    );
+
     this.router.delete('/tenant', this.tenantController.removeTenant);
   }
 }

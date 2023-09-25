@@ -40,6 +40,12 @@ export interface ITenantController {
     next: NextFunction,
   ) => Promise<Response | void>;
 
+  updateTenantCoverPicture: (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => Promise<Response | void>;
+
   removeTenant: (
     req: removeTenantReq,
     res: Response,
@@ -204,7 +210,34 @@ export class TenantController implements ITenantController {
 
       await this.tenantService.updateTenantProfilePic(fileUrl, fileName, 6);
 
-      return res.status(HTTP.OK).send('Image updated');
+      return res.status(HTTP.OK).send('Profile image updated');
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  public updateTenantCoverPicture = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const file = req.file;
+    if (!file) {
+      return next(new Api400Error('No file sent'));
+    }
+
+    try {
+      const fileName = 'tenant-6-' + file.originalname;
+
+      const fileUrl = await S3Actions.uploadFile({
+        bucketName: config.get('aws.tenantCoverPicBucker'),
+        fileName: fileName,
+        fileContent: file.buffer,
+      });
+
+      await this.tenantService.updateTenantCoverPic(fileUrl, fileName, 6);
+
+      return res.status(HTTP.OK).send('Cover image updated');
     } catch (err) {
       next(err);
     }
