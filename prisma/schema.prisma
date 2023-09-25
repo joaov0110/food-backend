@@ -22,6 +22,7 @@ model Tenant {
   is_new_tenant    Boolean  @db.Bit(1) @default(true)
   image_name       String?  @db.VarChar(150)
   image_url        String?   @db.VarChar(200)
+  bgImage_name     String?   @db.VarChar(200)
   bgImage_url      String?   @db.VarChar(200)
   created_at       DateTime  @default(now())
   updated_at       DateTime?
