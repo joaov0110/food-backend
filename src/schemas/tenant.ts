@@ -9,6 +9,7 @@ export interface ITenantData {
   accountant_email: string;
   accountant_phone: string;
   is_new_tenant: boolean;
+  image_name: string | null;
   image_url: string | null;
   bgImage_url: string | null;
   created_at: Date;
@@ -80,6 +81,7 @@ export const tenantDataToSelect = {
   accountant_email: true,
   accountant_phone: true,
   is_new_tenant: true,
+  image_name: true,
   image_url: true,
   bgImage_url: true,
   created_at: true,
