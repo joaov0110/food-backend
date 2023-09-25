@@ -37,6 +37,12 @@ export interface ITenantRepo {
     updateData: IupdateTenantRepo,
   ) => Promise<ItenantReturnal | null>;
 
+  updateTenantProfilePic: (
+    image_url: string,
+    image_name: string,
+    tenant_id: number,
+  ) => Promise<ItenantReturnal | null>;
+
   deleteTenant: (id: number) => Promise<ItenantReturnal | null>;
 
   filterTenant?: (filter: Ifilter) => Promise<ItenantReturnal | null>;
@@ -134,6 +140,27 @@ export class TenantRepo implements ITenantRepo {
       },
       select: tenantDataToSelect,
     });
+  };
+
+  public updateTenantProfilePic = async (
+    image_url: string,
+    image_name: string,
+    tenant_id: number,
+  ) => {
+    try {
+      return await this.orm.tenant.update({
+        data: {
+          image_url,
+          image_name,
+        },
+        where: {
+          id: tenant_id,
+        },
+        select: tenantDataToSelect,
+      });
+    } catch (err: any) {
+      throw new Error(err);
+    }
   };
 
   public deleteTenant = async (id: number) =>

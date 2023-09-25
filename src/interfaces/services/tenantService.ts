@@ -50,6 +50,12 @@ export interface ITenantService {
 
   updateTenant: (data: IupdateTenantRepo) => Promise<ItenantReturnal | void>;
 
+  updateTenantProfilePic: (
+    image_url: string,
+    image_name: string,
+    tenant_id: number,
+  ) => Promise<ItenantReturnal | void>;
+
   deleteTenant: (id: number) => Promise<ItenantReturnal | void>;
 }
 
@@ -178,6 +184,25 @@ export class TenantService implements ITenantService {
 
     if (!updated) {
       throw new Api500Error('Error updating tenant. Try again later');
+    }
+  };
+
+  updateTenantProfilePic = async (
+    image_url: string,
+    image_name: string,
+    tenant_id: number,
+  ) => {
+    try {
+      await this.tenantRepo.updateTenantProfilePic(
+        image_url,
+        image_name,
+        tenant_id,
+      );
+    } catch (err) {
+      console.error(err);
+      throw new Api500Error(
+        'Error updating tenant profile pic. Try again later',
+      );
     }
   };
 

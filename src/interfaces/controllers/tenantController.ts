@@ -1,17 +1,15 @@
+import config from 'config';
 import { Request, Response, NextFunction } from 'express';
-
 import {
   IcreateTenantRequest,
   IupdateTenantRequest,
 } from '../../schemas/tenant';
-
+import S3Actions from '../../utils/S3Actions';
 import { ITenantService } from '../services/tenantService';
-
 import { HTTP } from '../../constants/http';
-
 import { PasswordHash } from '../../utils/hashPassword';
-
 import dayjs from 'dayjs';
+import { Api400Error } from '../../utils/errors/api400Error';
 
 type createTenantReq = Request<any, any, IcreateTenantRequest>;
 type updateTenantReq = Request<any, any, IupdateTenantRequest>;
@@ -191,8 +189,25 @@ export class TenantController implements ITenantController {
     next: NextFunction,
   ) => {
     const file = req.file;
+    if (!file) {
+      return next(new Api400Error('No file sent'));
+    }
 
-    console.log('sdfsdfsfsfsf', file);
+    try {
+      const fileName = 'tenant-6-' + file.originalname;
+
+      const fileUrl = await S3Actions.uploadFile({
+        bucketName: config.get('aws.tenantProfilePicBucket'),
+        fileName: fileName,
+        fileContent: file.buffer,
+      });
+
+      await this.tenantService.updateTenantProfilePic(fileUrl, fileName, 6);
+
+      return res.status(HTTP.OK).send('Image updated');
+    } catch (err) {
+      next(err);
+    }
   };
 
   public removeTenant = async (

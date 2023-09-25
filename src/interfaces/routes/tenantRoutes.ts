@@ -35,7 +35,7 @@ export class TenantRoutes {
 
     this.router.put(
       '/tenant/profilePicture',
-      uploader.single('profilePicture'),
+      uploader.single('image'),
       this.tenantController.updateTenantProfilePicture,
     );
 
