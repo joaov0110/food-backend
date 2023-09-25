@@ -11,6 +11,7 @@ export interface ITenantData {
   is_new_tenant: boolean;
   image_name: string | null;
   image_url: string | null;
+  bgImage_name: string | null;
   bgImage_url: string | null;
   created_at: Date;
   updated_at: Date | null;
@@ -83,6 +84,7 @@ export const tenantDataToSelect = {
   is_new_tenant: true,
   image_name: true,
   image_url: true,
+  bgImage_name: true,
   bgImage_url: true,
   created_at: true,
   updated_at: true,
