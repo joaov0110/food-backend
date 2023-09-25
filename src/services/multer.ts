@@ -5,8 +5,11 @@ import { Api400Error } from '../utils/errors/api400Error';
 
 const storage = multer.memoryStorage();
 
+const maxFileSize = 2 * 1024 * 1024;
+
 export const uploader = multer({
   storage: storage,
+  limits: { fileSize: maxFileSize },
   fileFilter: (req: Request, file, cb) => {
     const allowerMimes = [
       'image/jpeg',
@@ -15,10 +18,12 @@ export const uploader = multer({
       'image/gif',
     ];
 
-    if (allowerMimes.includes(file.mimetype)) {
+    const validFileFormat = allowerMimes.includes(file.mimetype);
+
+    if (validFileFormat) {
       cb(null, true);
     } else {
-      cb(new Api400Error('Invalid file type'));
+      cb(new Api400Error(`Invalid file format`));
     }
   },
 });
