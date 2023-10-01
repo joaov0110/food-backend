@@ -1,13 +1,17 @@
+import config from 'config';
 import { Request, Response, NextFunction } from 'express';
 import { IPointService } from '../services/pointService';
 import { HTTP } from '../../constants/http';
 import { IcreatePointRequestData } from '../../schemas/point';
 import { ITenantService } from '../services/tenantService';
 import dayjs from 'dayjs';
+import S3Actions from '../../utils/S3Actions';
 
 type getPointRequest = Request<{ point_id: string }, any, any>;
 type getPointsRequest = Request<any, any, { tenant_id: number }>;
 type createPointRequest = Request<any, any, IcreatePointRequestData>;
+type updatePointProfileImageRequest = Request<any, any, { point_id: string }>;
+type updatePointBgImage = Request<any, any, { point_id: string }>;
 
 export interface IPointController {
   getPoint: (
@@ -24,6 +28,18 @@ export interface IPointController {
 
   createPoint: (
     req: createPointRequest,
+    res: Response,
+    next: NextFunction,
+  ) => Promise<Response | void>;
+
+  updatePointProfileImage: (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => Promise<Response | void>;
+
+  updatePointBgImage: (
+    req: updatePointBgImage,
     res: Response,
     next: NextFunction,
   ) => Promise<Response | void>;
@@ -99,6 +115,78 @@ class PointController implements IPointController {
       );
 
       return res.status(HTTP.CREATED).send('Point created successfully');
+    } catch (err) {
+      return next(err);
+    }
+  };
+
+  public updatePointProfileImage = async (
+    req: updatePointProfileImageRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const point_id = parseInt(req.body.point_id, 10);
+
+    try {
+      Promise.all([
+        await this.tenantService.tenantByIdShouldExist(6),
+        await this.pointService.pointByIdShouldExist(point_id),
+      ]);
+    } catch (err) {
+      return next(err);
+    }
+
+    try {
+      const file = req.file!;
+      const fileName = `point-${point_id}-` + file.originalname;
+
+      const fileUrl = await S3Actions.uploadFile({
+        bucketName: config.get('aws.pointProfilePicBucket'),
+        fileName,
+        fileContent: file.buffer,
+      });
+
+      await this.pointService.updatePointProfileImage(
+        fileUrl,
+        fileName,
+        point_id,
+      );
+
+      return res.status(HTTP.OK).send('Point profile image updated');
+    } catch (err) {
+      return next(err);
+    }
+  };
+
+  public updatePointBgImage = async (
+    req: updatePointBgImage,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const point_id = parseInt(req.body.point_id, 10);
+
+    try {
+      await Promise.all([
+        await this.tenantService.tenantByIdShouldExist(6),
+        await this.pointService.pointByIdShouldExist(point_id),
+      ]);
+    } catch (err) {
+      return next(err);
+    }
+
+    try {
+      const file = req.file!;
+      const fileName = `point-${point_id}-` + file.originalname;
+
+      const fileUrl = await S3Actions.uploadFile({
+        bucketName: config.get('aws.pointBgImageBucket'),
+        fileName,
+        fileContent: file.buffer,
+      });
+
+      await this.pointService.updatePointBgImage(fileUrl, fileName, point_id);
+
+      return res.status(HTTP.OK).send('Point background image updated');
     } catch (err) {
       return next(err);
     }

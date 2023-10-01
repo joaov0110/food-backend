@@ -13,9 +13,23 @@ export interface IPointService {
 
   pointByPhoneShouldNotExist: (point_phone: string) => Promise<any>;
 
+  pointByIdShouldExist: (point_id: number) => Promise<any>;
+
   createPoint: (
     pointData: IcreatePoint,
     tenant_id: number,
+  ) => Promise<IgetPoint | void>;
+
+  updatePointProfileImage: (
+    image_url: string,
+    image_name: string,
+    point_id: number,
+  ) => Promise<IgetPoint | void>;
+
+  updatePointBgImage: (
+    bgImage_url: string,
+    bgImage_name: string,
+    point_id: number,
   ) => Promise<IgetPoint | void>;
 }
 
@@ -62,6 +76,15 @@ class PointService implements IPointService {
     }
   };
 
+  pointByIdShouldExist = async (point_id: number) => {
+    const point = await this.pointRepo.getPoint(point_id);
+
+    if (!point) {
+      throw new Api404Error('Point not found');
+    }
+
+    return point;
+  };
   public createPoint = async (data: IcreatePoint, tenant_id: number) => {
     try {
       const createPoint = await this.pointRepo.createPoint(data, tenant_id);
@@ -70,6 +93,44 @@ class PointService implements IPointService {
     } catch (err) {
       console.error(err);
       throw new Api500Error('Error creating point. Try again later');
+    }
+  };
+
+  public updatePointProfileImage = async (
+    image_url: string,
+    image_name: string,
+    point_id: number,
+  ) => {
+    try {
+      return await this.pointRepo.updatePointProfilePicture(
+        image_url,
+        image_name,
+        point_id,
+      );
+    } catch (err) {
+      console.error(err);
+      throw new Api500Error(
+        'Error updating point profile image image. Try again later',
+      );
+    }
+  };
+
+  public updatePointBgImage = async (
+    bgImage_url: string,
+    bgImage_name: string,
+    point_id: number,
+  ) => {
+    try {
+      return await this.pointRepo.updatePointBgImage(
+        bgImage_url,
+        bgImage_name,
+        point_id,
+      );
+    } catch (err) {
+      console.error(err);
+      throw new Api500Error(
+        'Error updating point background image. Try again later',
+      );
     }
   };
 }

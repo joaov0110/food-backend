@@ -20,6 +20,18 @@ export interface IPointRepo {
     data: IcreatePoint,
     tenant_id: number,
   ) => Promise<IgetPoint | void>;
+
+  updatePointProfilePicture: (
+    image_url: string,
+    image_name: string,
+    point_id: number,
+  ) => Promise<IgetPoint | void>;
+
+  updatePointBgImage: (
+    bgImage_url: string,
+    bgImage_name: string,
+    point_id: number,
+  ) => Promise<IgetPoint | void>;
 }
 
 class PointRepo implements IPointRepo {
@@ -76,6 +88,46 @@ class PointRepo implements IPointRepo {
           tenant_id,
         },
         select: pointDataToSelect,
+      });
+    } catch (err: any) {
+      throw new Error(err);
+    }
+  };
+
+  public updatePointProfilePicture = async (
+    image_url: string,
+    image_name: string,
+    point_id: number,
+  ) => {
+    try {
+      return await this.orm.point.update({
+        data: {
+          image_url,
+          image_name,
+        },
+        where: {
+          id: point_id,
+        },
+      });
+    } catch (err: any) {
+      throw new Error(err);
+    }
+  };
+
+  public updatePointBgImage = async (
+    bgImage_url: string,
+    bgImage_name: string,
+    point_id: number,
+  ) => {
+    try {
+      return await this.orm.point.update({
+        data: {
+          bgImage_url,
+          bgImage_name,
+        },
+        where: {
+          id: point_id,
+        },
       });
     } catch (err: any) {
       throw new Error(err);
