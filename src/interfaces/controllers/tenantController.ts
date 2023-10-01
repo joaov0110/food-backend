@@ -194,12 +194,14 @@ export class TenantController implements ITenantController {
     res: Response,
     next: NextFunction,
   ) => {
-    const file = req.file;
-    if (!file) {
-      return next(new Api400Error('No file sent'));
+    try {
+      await this.tenantService.tenantByIdShouldExist(6);
+    } catch (err) {
+      return next(err);
     }
 
     try {
+      const file = req.file!;
       const fileName = 'tenant-6-' + file.originalname;
 
       const fileUrl = await S3Actions.uploadFile({
@@ -212,7 +214,7 @@ export class TenantController implements ITenantController {
 
       return res.status(HTTP.OK).send('Profile image updated');
     } catch (err) {
-      next(err);
+      return next(err);
     }
   };
 
@@ -221,12 +223,14 @@ export class TenantController implements ITenantController {
     res: Response,
     next: NextFunction,
   ) => {
-    const file = req.file;
-    if (!file) {
-      return next(new Api400Error('No file sent'));
+    try {
+      await this.tenantService.tenantByIdShouldExist(6);
+    } catch (err) {
+      return next(err);
     }
 
     try {
+      const file = req.file!;
       const fileName = 'tenant-6-' + file.originalname;
 
       const fileUrl = await S3Actions.uploadFile({
@@ -239,7 +243,7 @@ export class TenantController implements ITenantController {
 
       return res.status(HTTP.OK).send('Cover image updated');
     } catch (err) {
-      next(err);
+      return next(err);
     }
   };
 
