@@ -2,7 +2,10 @@ import config from 'config';
 import { Request, Response, NextFunction } from 'express';
 import { IPointService } from '../services/pointService';
 import { HTTP } from '../../constants/http';
-import { IcreatePointRequestData } from '../../schemas/point';
+import {
+  IcreatePointRequestData,
+  IupdatePointRequest,
+} from '../../schemas/point';
 import { ITenantService } from '../services/tenantService';
 import dayjs from 'dayjs';
 import S3Actions from '../../utils/S3Actions';
@@ -10,6 +13,7 @@ import S3Actions from '../../utils/S3Actions';
 type getPointRequest = Request<{ point_id: string }, any, any>;
 type getPointsRequest = Request<any, any, { tenant_id: number }>;
 type createPointRequest = Request<any, any, IcreatePointRequestData>;
+type updatePointRequest = Request<any, any, IupdatePointRequest>;
 type updatePointProfileImageRequest = Request<any, any, { point_id: string }>;
 type updatePointBgImage = Request<any, any, { point_id: string }>;
 
@@ -28,6 +32,12 @@ export interface IPointController {
 
   createPoint: (
     req: createPointRequest,
+    res: Response,
+    next: NextFunction,
+  ) => Promise<Response | void>;
+
+  updatePoint: (
+    req: updatePointRequest,
     res: Response,
     next: NextFunction,
   ) => Promise<Response | void>;
@@ -115,6 +125,45 @@ class PointController implements IPointController {
       );
 
       return res.status(HTTP.CREATED).send('Point created successfully');
+    } catch (err) {
+      return next(err);
+    }
+  };
+
+  public updatePoint = async (
+    req: updatePointRequest,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    const point_id = parseInt(req.body.point_id, 10);
+    const { name, email, phone, address } = req.body;
+
+    console.log('sdfsdfsdfsdfsdf', req.body);
+
+    try {
+      Promise.all([
+        await this.tenantService.tenantByIdShouldExist(6),
+        await this.pointService.getPoint(point_id),
+      ]);
+    } catch (err) {
+      next(err);
+    }
+
+    try {
+      await this.pointService.updatePoint(
+        {
+          name,
+          email,
+          phone,
+          pointAddress: {
+            ...address,
+            updated_at: dayjs().toDate(),
+          },
+        },
+        point_id,
+      );
+
+      return res.status(HTTP.OK).send('Point updated');
     } catch (err) {
       return next(err);
     }

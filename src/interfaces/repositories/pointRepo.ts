@@ -3,9 +3,11 @@ import { PrismaClient } from '@prisma/client';
 import {
   IcreatePoint,
   IgetPoint,
+  IupdatePoint,
   pointDataToSelect,
 } from '../../schemas/point';
 import { Api500Error } from '../../utils/errors/api500Error';
+import dayjs from 'dayjs';
 
 export interface IPointRepo {
   getPoint: (point_id: number) => Promise<IgetPoint | null>;
@@ -19,6 +21,11 @@ export interface IPointRepo {
   createPoint: (
     data: IcreatePoint,
     tenant_id: number,
+  ) => Promise<IgetPoint | void>;
+
+  updatePoint: (
+    data: IupdatePoint,
+    point_id: number,
   ) => Promise<IgetPoint | void>;
 
   updatePointProfilePicture: (
@@ -82,10 +89,41 @@ class PointRepo implements IPointRepo {
     tenant_id: number,
   ): Promise<IgetPoint | void> => {
     try {
-      await this.orm.point.create({
+      return await this.orm.point.create({
         data: {
           ...pointData,
           tenant_id,
+        },
+        select: pointDataToSelect,
+      });
+    } catch (err: any) {
+      throw new Error(err);
+    }
+  };
+
+  public updatePoint = async (data: IupdatePoint, point_id: number) => {
+    const { name, email, phone, pointAddress } = data;
+
+    try {
+      return await this.orm.point.update({
+        data: {
+          name,
+          email,
+          phone,
+          address: {
+            upsert: {
+              update: {
+                ...pointAddress,
+              },
+              create: {
+                ...pointAddress,
+                created_at: dayjs().toDate(),
+              },
+            },
+          },
+        },
+        where: {
+          id: point_id,
         },
         select: pointDataToSelect,
       });

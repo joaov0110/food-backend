@@ -1,23 +1,28 @@
 import { IPointRepo } from '../repositories/pointRepo';
 import { Api404Error } from '../../utils/errors/api404Error';
 import { Api400Error } from '../../utils/errors/api400Error';
-import { IcreatePoint, IgetPoint } from '../../schemas/point';
+import { IcreatePoint, IgetPoint, IupdatePoint } from '../../schemas/point';
 import { Api500Error } from '../../utils/errors/api500Error';
 
 export interface IPointService {
-  getPoint: (point_id: number) => Promise<any>;
+  getPoint: (point_id: number) => Promise<IgetPoint | null>;
 
-  getPoints: (tenant_id: number) => Promise<any>;
+  getPoints: (tenant_id: number) => Promise<IgetPoint[] | null>;
 
-  pointByNameShouldNotExist: (point_name: string) => Promise<any>;
+  pointByNameShouldNotExist: (point_name: string) => Promise<void>;
 
-  pointByPhoneShouldNotExist: (point_phone: string) => Promise<any>;
+  pointByPhoneShouldNotExist: (point_phone: string) => Promise<void>;
 
-  pointByIdShouldExist: (point_id: number) => Promise<any>;
+  pointByIdShouldExist: (point_id: number) => Promise<IgetPoint>;
 
   createPoint: (
     pointData: IcreatePoint,
     tenant_id: number,
+  ) => Promise<IgetPoint | void>;
+
+  updatePoint: (
+    data: IupdatePoint,
+    point_id: number,
   ) => Promise<IgetPoint | void>;
 
   updatePointProfileImage: (
@@ -93,6 +98,17 @@ class PointService implements IPointService {
     } catch (err) {
       console.error(err);
       throw new Api500Error('Error creating point. Try again later');
+    }
+  };
+
+  public updatePoint = async (data: IupdatePoint, point_id: number) => {
+    try {
+      const updatePoint = await this.pointRepo.updatePoint(data, point_id);
+
+      return updatePoint;
+    } catch (err) {
+      console.error(err);
+      throw new Api500Error('Error updating point. Try again later');
     }
   };
 
