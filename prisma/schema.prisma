@@ -36,7 +36,9 @@ model Point {
   name        String    @db.VarChar(25)
   email       String    @db.VarChar(50) @unique()
   phone       String    @db.VarChar(20) @unique()
+  image_name       String?  @db.VarChar(150)
   image_url   String?    @db.VarChar(200) @unique()
+  bgImage_name     String?   @db.VarChar(200)
   bgImage_url String?    @db.VarChar(200)  @unique()
   created_at  DateTime   @default(now())
   updated_at  DateTime?
