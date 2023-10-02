@@ -48,42 +48,64 @@ class PointRepo implements IPointRepo {
     this.orm = prisma;
   }
 
-  public getPoint = async (point_id: number): Promise<IgetPoint | null> =>
-    await this.orm.point.findUnique({
-      where: {
-        id: point_id,
-      },
-      select: pointDataToSelect,
-    });
+  public getPoint = async (point_id: number): Promise<IgetPoint | null> => {
+    try {
+      return await this.orm.point.findUnique({
+        where: {
+          id: point_id,
+        },
+        select: pointDataToSelect,
+      });
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err);
+    }
+  };
 
-  public getPoints = async (tenant_id: number): Promise<IgetPoint[]> =>
-    await this.orm.point.findMany({
-      where: {
-        tenant_id,
-      },
-      select: pointDataToSelect,
-    });
-
+  public getPoints = async (tenant_id: number): Promise<IgetPoint[]> => {
+    try {
+      return await this.orm.point.findMany({
+        where: {
+          tenant_id,
+        },
+        select: pointDataToSelect,
+      });
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err);
+    }
+  };
   public getPointByName = async (
     point_name: string,
-  ): Promise<IgetPoint | null> =>
-    await this.orm.point.findFirst({
-      where: {
-        name: point_name,
-      },
-      select: pointDataToSelect,
-    });
+  ): Promise<IgetPoint | null> => {
+    try {
+      return await this.orm.point.findFirst({
+        where: {
+          name: point_name,
+        },
+        select: pointDataToSelect,
+      });
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err);
+    }
+  };
 
   public getPointByPhone = async (
     point_phone: string,
-  ): Promise<IgetPoint | null> =>
-    await this.orm.point.findUnique({
-      where: {
-        phone: point_phone,
-      },
-      select: pointDataToSelect,
-    });
-
+  ): Promise<IgetPoint | null> => {
+    try {
+      return await this.orm.point.findUnique({
+        where: {
+          phone: point_phone,
+        },
+        select: pointDataToSelect,
+      });
+    } catch (err: any) {
+      console.error(err);
+      throw new Error(err);
+    }
+  };
   public createPoint = async (
     pointData: IcreatePoint,
     tenant_id: number,
@@ -97,6 +119,7 @@ class PointRepo implements IPointRepo {
         select: pointDataToSelect,
       });
     } catch (err: any) {
+      console.error(err);
       throw new Error(err);
     }
   };
@@ -128,6 +151,7 @@ class PointRepo implements IPointRepo {
         select: pointDataToSelect,
       });
     } catch (err: any) {
+      console.error(err);
       throw new Error(err);
     }
   };
@@ -148,6 +172,7 @@ class PointRepo implements IPointRepo {
         },
       });
     } catch (err: any) {
+      console.error(err);
       throw new Error(err);
     }
   };
@@ -168,6 +193,7 @@ class PointRepo implements IPointRepo {
         },
       });
     } catch (err: any) {
+      console.error(err);
       throw new Error(err);
     }
   };

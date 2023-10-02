@@ -96,7 +96,6 @@ class PointService implements IPointService {
 
       return createPoint;
     } catch (err) {
-      console.error(err);
       throw new Api500Error('Error creating point. Try again later');
     }
   };
@@ -107,7 +106,6 @@ class PointService implements IPointService {
 
       return updatePoint;
     } catch (err) {
-      console.error(err);
       throw new Api500Error('Error updating point. Try again later');
     }
   };
@@ -124,7 +122,6 @@ class PointService implements IPointService {
         point_id,
       );
     } catch (err) {
-      console.error(err);
       throw new Api500Error(
         'Error updating point profile image image. Try again later',
       );
@@ -143,7 +140,6 @@ class PointService implements IPointService {
         point_id,
       );
     } catch (err) {
-      console.error(err);
       throw new Api500Error(
         'Error updating point background image. Try again later',
       );
