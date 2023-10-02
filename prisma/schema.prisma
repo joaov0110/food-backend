@@ -53,6 +53,8 @@ model Point {
 model Catalog {
   id          Int       @id @default(autoincrement()) @unique
   name        String    @db.VarChar(25)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
   points      CatalogOnPoint[]
   productGroups  CatalogOnProductGroups[]
 }
