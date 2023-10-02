@@ -7,12 +7,15 @@ import express, { urlencoded, json, Router } from 'express';
 
 import tenantFactory from './interfaces/factories/tenantFactory';
 import pointFactory from './interfaces/factories/pointFactory';
+import catalogFactory from './interfaces/factories/catalogFactory';
+
 import errorHandler from './utils/errors/errorHandler';
 
 class Main {
   public app;
   private tenantController: Router;
   private pointRouter: Router;
+  private catalogRouter: Router;
 
   constructor() {
     env.config();
@@ -40,6 +43,7 @@ class Main {
   private setupControllers() {
     this.tenantController = tenantFactory;
     this.pointRouter = pointFactory;
+    this.catalogRouter = catalogFactory;
 
     this.useControllers();
   }
@@ -47,6 +51,7 @@ class Main {
   private useControllers() {
     this.app.use('/api/tenants', this.tenantController);
     this.app.use('/api/points', this.pointRouter);
+    this.app.use('/api/catalogs', this.catalogRouter);
   }
 
   private useErrorHandlers() {
