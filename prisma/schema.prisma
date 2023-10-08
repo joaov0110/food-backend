@@ -73,14 +73,16 @@ model CatalogOnPoint {
 model ProductGroups {
   id             Int      @id @default(autoincrement()) @unique
   name           String   @db.VarChar(25)
-
+  created_at     DateTime @default(now())
+  updated_at     DateTime @default(now())
+   
   product        Product[]
   catalogs       CatalogOnProductGroups[]
 }
 
 model CatalogOnProductGroups {
-  productGroups   ProductGroups    @relation(fields: [productGroup_id], references: [id])
-  catalogs        Catalog          @relation(fields: [catalog_id], references: [id])
+  productGroups   ProductGroups    @relation(fields: [productGroup_id], references: [id], onDelete: Cascade)
+  catalogs        Catalog          @relation(fields: [catalog_id], references: [id], onDelete: Cascade)
   productGroup_id Int
   catalog_id      Int
   created_at      DateTime         @default(now())
