@@ -8,6 +8,7 @@ import express, { urlencoded, json, Router } from 'express';
 import tenantFactory from './interfaces/factories/tenantFactory';
 import pointFactory from './interfaces/factories/pointFactory';
 import catalogFactory from './interfaces/factories/catalogFactory';
+import productGroupsFactory from './interfaces/factories/productGroupsFactory';
 
 import errorHandler from './utils/errors/errorHandler';
 
@@ -16,6 +17,7 @@ class Main {
   private tenantController: Router;
   private pointRouter: Router;
   private catalogRouter: Router;
+  private productGroupsRouter: Router;
 
   constructor() {
     env.config();
@@ -44,6 +46,7 @@ class Main {
     this.tenantController = tenantFactory;
     this.pointRouter = pointFactory;
     this.catalogRouter = catalogFactory;
+    this.productGroupsRouter = productGroupsFactory;
 
     this.useControllers();
   }
@@ -52,6 +55,7 @@ class Main {
     this.app.use('/api/tenants', this.tenantController);
     this.app.use('/api/points', this.pointRouter);
     this.app.use('/api/catalogs', this.catalogRouter);
+    this.app.use('/api/productGroups', this.productGroupsRouter);
   }
 
   private useErrorHandlers() {
